@@ -1,0 +1,106 @@
+#Mikrotik Balanceo PCC con "per-connection-classifier=both-addresses-and-ports"
+#En este ejemplo, se utiliza 4 Lineas INFINITUM con segmento 192.168.1.x
+#y 1 Linea Megacable con segmento 192.168.0.x
+#Para indicar por donde saldra el trafico a cada linea, se utiliza el parametro:
+#gateway=192.168.1.254%WAN1   -> Para INFINITUM
+#gateway=192.168.0.1%WAN5     -> Para Megacable
+#Renombrar interfaces a WAN1, WAN2, WAN3, WAN4
+
+
+/ip firewall mangle
+    add action=mark-connection chain=input disabled=no in-interface=WAN1 new-connection-mark=WAN1_conn passthrough=yes comment="Reglas de Balanceo PCC"
+    add action=mark-connection chain=input disabled=no in-interface=WAN2 new-connection-mark=WAN2_conn passthrough=yes
+    add action=mark-connection chain=input disabled=no in-interface=WAN3 new-connection-mark=WAN3_conn passthrough=yes
+    add action=mark-connection chain=input disabled=no in-interface=WAN4 new-connection-mark=WAN4_conn passthrough=yes
+    add action=mark-connection chain=input disabled=no in-interface=WAN5 new-connection-mark=WAN5_conn passthrough=yes
+
+    add action=mark-routing chain=output connection-mark=WAN1_conn disabled=no new-routing-mark=to_WAN1 passthrough=yes
+    add action=mark-routing chain=output connection-mark=WAN2_conn disabled=no new-routing-mark=to_WAN2 passthrough=yes
+    add action=mark-routing chain=output connection-mark=WAN3_conn disabled=no new-routing-mark=to_WAN3 passthrough=yes
+    add action=mark-routing chain=output connection-mark=WAN4_conn disabled=no new-routing-mark=to_WAN4 passthrough=yes
+    add action=mark-routing chain=output connection-mark=WAN5_conn disabled=no new-routing-mark=to_WAN5 passthrough=yes
+
+    add chain=prerouting dst-address=192.168.1.0/24 action=accept in-interface=LAN_P7 comment="Accepta trafico de LAN del Puerto 7 a Internet"
+	add chain=prerouting dst-address=192.168.0.0/24 action=accept in-interface=LAN_P7
+    add chain=prerouting dst-address=192.168.1.0/24 action=accept in-interface=LAN_P8 comment="Accepta trafico de LAN del Puerto 8 a Internet"
+	add chain=prerouting dst-address=192.168.0.0/24 action=accept in-interface=LAN_P8	
+    add chain=prerouting dst-address=192.168.1.0/24 action=accept in-interface=LAN_P9 comment="Accepta trafico de LAN del Puerto 9 a Internet"
+	add chain=prerouting dst-address=192.168.0.0/24 action=accept in-interface=LAN_P9
+    add chain=prerouting dst-address=192.168.1.0/24 action=accept in-interface=LAN_P10 comment="Accepta trafico de LAN del Puerto 10 a Internet"
+	add chain=prerouting dst-address=192.168.0.0/24 action=accept in-interface=LAN_P10
+
+
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN1_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/0 comment="Balanceo en porcentajes 1 a 1 para LAN Puerto 7"
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN2_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/1
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN3_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/2
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN4_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/3
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/4
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P7 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/5
+	
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN1_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/0 comment="Balanceo en porcentajes 1 a 1 para LAN Puerto 8"
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN2_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/1
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN3_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/2
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN4_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/3
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/4
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P8 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/5
+	
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN1_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/0 comment="Balanceo en porcentajes 1 a 1 para LAN Puerto 9"
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN2_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/1
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN3_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/2
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN4_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/3
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/4
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P9 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/5
+	
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN1_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/0 comment="Balanceo en porcentajes 1 a 1 para LAN Puerto 10"
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN2_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/1
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN3_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/2
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN4_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/3
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/4
+    add action=mark-connection chain=prerouting disabled=no dst-address-type=!local in-interface=LAN_P10 new-connection-mark=WAN5_conn passthrough=yes per-connection-classifier=both-addresses-and-ports:6/5
+
+
+    add action=mark-routing chain=prerouting connection-mark=WAN1_conn disabled=no in-interface=LAN_P7 new-routing-mark=to_WAN1 passthrough=yes comment="Marcado de paquetes para LAN Puerto 7"
+    add action=mark-routing chain=prerouting connection-mark=WAN2_conn disabled=no in-interface=LAN_P7 new-routing-mark=to_WAN2 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN3_conn disabled=no in-interface=LAN_P7 new-routing-mark=to_WAN3 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN4_conn disabled=no in-interface=LAN_P7 new-routing-mark=to_WAN4 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN5_conn disabled=no in-interface=LAN_P7 new-routing-mark=to_WAN5 passthrough=yes
+    
+    add action=mark-routing chain=prerouting connection-mark=WAN1_conn disabled=no in-interface=LAN_P8 new-routing-mark=to_WAN1 passthrough=yes comment="Marcado de paquetes para LAN Puerto 8"
+    add action=mark-routing chain=prerouting connection-mark=WAN2_conn disabled=no in-interface=LAN_P8 new-routing-mark=to_WAN2 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN3_conn disabled=no in-interface=LAN_P8 new-routing-mark=to_WAN3 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN4_conn disabled=no in-interface=LAN_P8 new-routing-mark=to_WAN4 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN5_conn disabled=no in-interface=LAN_P8 new-routing-mark=to_WAN5 passthrough=yes
+    
+    add action=mark-routing chain=prerouting connection-mark=WAN1_conn disabled=no in-interface=LAN_P9 new-routing-mark=to_WAN1 passthrough=yes comment="Marcado de paquetes para LAN Puerto 9"
+    add action=mark-routing chain=prerouting connection-mark=WAN2_conn disabled=no in-interface=LAN_P9 new-routing-mark=to_WAN2 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN3_conn disabled=no in-interface=LAN_P9 new-routing-mark=to_WAN3 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN4_conn disabled=no in-interface=LAN_P9 new-routing-mark=to_WAN4 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN5_conn disabled=no in-interface=LAN_P9 new-routing-mark=to_WAN5 passthrough=yes
+    
+    add action=mark-routing chain=prerouting connection-mark=WAN1_conn disabled=no in-interface=LAN_P10 new-routing-mark=to_WAN1 passthrough=yes comment="Marcado de paquetes para LAN Puerto 10"
+    add action=mark-routing chain=prerouting connection-mark=WAN2_conn disabled=no in-interface=LAN_P10 new-routing-mark=to_WAN2 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN3_conn disabled=no in-interface=LAN_P10 new-routing-mark=to_WAN3 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN4_conn disabled=no in-interface=LAN_P10 new-routing-mark=to_WAN4 passthrough=yes
+    add action=mark-routing chain=prerouting connection-mark=WAN5_conn disabled=no in-interface=LAN_P10 new-routing-mark=to_WAN5 passthrough=yes
+    
+/ip firewall nat
+    add  action=masquerade chain=srcnat disabled=no out-interface=WAN1 comment="Reglas de Balanceo PCC"
+    add  action=masquerade chain=srcnat disabled=no out-interface=WAN2
+    add  action=masquerade chain=srcnat disabled=no out-interface=WAN3
+    add  action=masquerade chain=srcnat disabled=no out-interface=WAN4
+    add  action=masquerade chain=srcnat disabled=no out-interface=WAN5
+    
+/ip route
+    add check-gateway=ping disabled=no dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN1 routing-mark=to_WAN1 scope=30 target-scope=10 comment="Reglas de Balanceo PCC"
+    add check-gateway=ping disabled=no dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN2 routing-mark=to_WAN2 scope=30 target-scope=10
+    add check-gateway=ping disabled=no dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN3 routing-mark=to_WAN3 scope=30 target-scope=10
+    add check-gateway=ping disabled=no dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN4 routing-mark=to_WAN4 scope=30 target-scope=10
+    add check-gateway=ping disabled=no dst-address=0.0.0.0/0 gateway=192.168.0.1%WAN5 routing-mark=to_WAN5 scope=30 target-scope=10
+
+    add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN1 scope=10 target-scope=10
+    add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN2 scope=10 target-scope=10
+    add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN3 scope=10 target-scope=10
+    add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.1.254%WAN4 scope=10 target-scope=10
+    add check-gateway=ping disabled=no distance=1 dst-address=0.0.0.0/0 gateway=192.168.0.1%WAN5 scope=10 target-scope=10
+
+	
