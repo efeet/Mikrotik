@@ -5,6 +5,12 @@
 #gateway=192.168.1.254%WAN1   -> Para INFINITUM
 #gateway=192.168.0.1%WAN5     -> Para Megacable
 #Renombrar interfaces a WAN1, WAN2, WAN3, WAN4
+#Configurar IPs de cada interface WAN, ejemplo:
+#WAN1: 192.168.1.10
+#WAN2: 192.168.1.11
+#WAN3: 192.168.1.12
+#WAN4: 192.168.1.13
+#WAN4: 192.168.0.14   -> OJO Esta direccion cambia al segmento de Megacable
 
 
 /ip firewall mangle
